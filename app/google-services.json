@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "408082777952",
+    "project_id": "music-clone-c3c2b",
+    "storage_bucket": "music-clone-c3c2b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:408082777952:android:e030541fd241a2106ec005",
+        "android_client_info": {
+          "package_name": "com.example.music_clone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "408082777952-s7g7va8oe7lcms81jljkj0qch207jbud.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.music_clone",
+            "certificate_hash": "b67d6746d2e56961825a27ea4dd8dff1f730ee27"
+          }
+        },
+        {
+          "client_id": "408082777952-cidr4sgotrnc9c5onqpia69a9okamjhb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnOoyfS7oXhlcCNDcwrz9iRpOY4qf0l4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "408082777952-cidr4sgotrnc9c5onqpia69a9okamjhb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
