@@ -60,6 +60,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
             mSelectedCategory = getArguments().getString("category");
             mSelectedArtist = getArguments().getParcelable("artist");
         }
+        setRetainInstance(true);
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -122,12 +123,12 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mAdapter.notifyDataSetChanged();
     }
     private void initRecyclerView(View view) {
+        mRecyclerView = view.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mAdapter = new PlaylistRecyclerAdapter(mMediaList ,getActivity(),this);
+        mRecyclerView.setAdapter(mAdapter);
 
-        if(mRecyclerView == null ){
-            mRecyclerView = view.findViewById(R.id.recycler_view);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            mAdapter = new PlaylistRecyclerAdapter(mMediaList ,getActivity(),this);
-            mRecyclerView.setAdapter(mAdapter);
+        if(mMediaList.size() == 0){
             retrieveMedia();
         }
 

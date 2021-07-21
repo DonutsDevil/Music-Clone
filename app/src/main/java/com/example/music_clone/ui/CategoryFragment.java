@@ -60,6 +60,7 @@ public class CategoryFragment extends Fragment implements CategoryRecyclerAdapte
         if(getArguments() != null) {
             mSelectedCategory = getArguments().getString("category");
         }
+        setRetainInstance(true);
     }
 
     @Override
@@ -113,12 +114,11 @@ public class CategoryFragment extends Fragment implements CategoryRecyclerAdapte
         mAdapter.notifyDataSetChanged();
     }
     private void initRecyclerView(View view) {
-
-        if(mRecyclerView == null ){
-            mRecyclerView = view.findViewById(R.id.recycler_view);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            mAdapter = new CategoryRecyclerAdapter(mArtist ,getActivity(),this);
-            mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView = view.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mAdapter = new CategoryRecyclerAdapter(mArtist ,getActivity(),this);
+        mRecyclerView.setAdapter(mAdapter);
+        if(mArtist.size() == 0) {
             retrieveArtist();
         }
 
