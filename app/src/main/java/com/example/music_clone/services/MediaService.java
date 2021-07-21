@@ -17,7 +17,7 @@ public class MediaService extends MediaBrowserServiceCompat {
     private static final String TAG = "MediaService";
     private MediaSessionCompat mSession;
 
-    public MediaService(){
+    public MediaService()  {
         mSession = new MediaSessionCompat(this,TAG);
         mSession.setFlags(
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
