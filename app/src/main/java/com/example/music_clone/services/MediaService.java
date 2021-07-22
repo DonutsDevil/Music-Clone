@@ -15,6 +15,7 @@ import androidx.media.MediaBrowserServiceCompat;
 
 import com.example.music_clone.players.MediaPlayerAdapter;
 import com.example.music_clone.players.PlayerAdapter;
+import com.example.music_clone.util.MediaLibrary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,12 @@ public class MediaService extends MediaBrowserServiceCompat {
     private static final String TAG = "MediaService";
     private MediaSessionCompat mSession;
     private PlayerAdapter mPlayback;
+    private MediaLibrary mMediaLibrary;
 
     @Override
     public void onCreate()  {
         super.onCreate();
+        mMediaLibrary = new MediaLibrary();
         mSession = new MediaSessionCompat(this,TAG);
         mSession.setFlags(
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -68,6 +71,7 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         if(clientPackageName.equals(getApplicationContext().getPackageName())) {
             // allowed to browser media
+            return new BrowserRoot("some_fake_playlist",null);
         }
         return new BrowserRoot("empty_media",null);
     }
@@ -80,7 +84,7 @@ public class MediaService extends MediaBrowserServiceCompat {
             result.sendResult(null);
             return;
         }
-        result.sendResult(null);
+        result.sendResult(MediaLibrary.getMediaItems());
     }
 
     public class MediaSessionCallbacks extends MediaSessionCompat.Callback {
@@ -99,7 +103,8 @@ public class MediaService extends MediaBrowserServiceCompat {
             if (mQueueIndex < 0 && mPlayList.isEmpty()) {
                 return;
             }
-            mPreparedMedia = null; // TODO: Need To retrieve the selected media here
+            String mediaId = mPlayList.get(mQueueIndex).getDescription().getMediaId();
+            mPreparedMedia = mMediaLibrary.getTreeMap().get(mediaId);
 
             if(!mSession.isActive()) {
                 mSession.setActive(true);

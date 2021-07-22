@@ -50,7 +50,9 @@ public class MediaControllerFragment extends Fragment implements
 
     @Override
     public void onClick(View v) {
-
+        if (v.getId()==R.id.play_pause) {
+            mIMainActivity.playPause();
+        }
     }
 
     // Call when we select a song from PlaylistFragment

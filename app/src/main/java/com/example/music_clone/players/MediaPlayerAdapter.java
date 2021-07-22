@@ -1,6 +1,6 @@
 package com.example.music_clone.players;
 
-import android.content.Context;
+import  android.content.Context;
 import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -37,13 +37,14 @@ public class MediaPlayerAdapter extends PlayerAdapter {
 
     public MediaPlayerAdapter(@NonNull Context context) {
         super(context);
+        mContext = context;
     }
 
     private void initializeExoPlayer(){
         if(mExoPlayer == null) {
             mTrackSelector = new DefaultTrackSelector();
             mRenderer = new DefaultRenderersFactory(mContext);
-            mDataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext,"music_clone"));
+            mDataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext,"Music-Clone"));
             mExoPlayer = new SimpleExoPlayer.Builder(mContext,mRenderer)
                     .setTrackSelector(mTrackSelector)
                     .setLoadControl(new DefaultLoadControl())
