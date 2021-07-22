@@ -11,7 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.music_clone.R;
+import com.example.music_clone.client.MediaBrowserHelper;
 import com.example.music_clone.models.Artist;
+import com.example.music_clone.services.MediaService;
 import com.example.music_clone.util.MainActivityFragmentManager;
 
 import java.util.ArrayList;
@@ -24,15 +26,29 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     private ProgressBar mProgressBar;
 
     // Vars
-
+    private MediaBrowserHelper mMediaBrowserHelper;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mProgressBar = findViewById(R.id.progress_bar);
+        mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
+
         if (savedInstanceState == null) {
             loadFragment(HomeFragment.newInstance(), true);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mMediaBrowserHelper.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mMediaBrowserHelper.onStop();
     }
 
     @Override
