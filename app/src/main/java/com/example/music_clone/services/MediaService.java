@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
+import static com.example.music_clone.util.Constants.QUEUE_NEW_PLAYLIST;
 
 public class MediaService extends MediaBrowserServiceCompat {
     private static final String TAG = "MediaService";
@@ -94,10 +95,16 @@ public class MediaService extends MediaBrowserServiceCompat {
         private final List<MediaSessionCompat.QueueItem> mPlayList = new ArrayList<>();
         private int mQueueIndex = -1;
         private MediaMetadataCompat mPreparedMedia;
-
+        private void resetPlaylist() {
+            mPlayList.clear();
+            mQueueIndex = -1;
+        }
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             Log.d(TAG, "onPlayFromMediaId: Called");
+            if (extras.getBoolean(QUEUE_NEW_PLAYLIST,false )) {
+                resetPlaylist();
+            }
             mPreparedMedia = mMyApplication.getMediaItem(mediaId);
             mSession.setMetadata(mPreparedMedia);
             if (!mSession.isActive()) {

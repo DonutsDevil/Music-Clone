@@ -4,6 +4,7 @@ import android.support.v4.media.MediaMetadataCompat;
 
 import com.example.music_clone.MyApplication;
 import com.example.music_clone.models.Artist;
+import com.example.music_clone.util.MyPreferenceManager;
 
 public interface IMainActivity {
     void hideProgressBar();
@@ -14,4 +15,5 @@ public interface IMainActivity {
     void playPause();
     MyApplication getMyApplication();
     void onMediaSelected(String playlistId, MediaMetadataCompat mediaItem, int queuePosition);
+    MyPreferenceManager getMyPrefManager();
 }

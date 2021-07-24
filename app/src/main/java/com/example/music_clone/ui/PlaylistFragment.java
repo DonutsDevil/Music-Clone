@@ -146,6 +146,11 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mSelectedMedia = mMediaList.get(position);
         mAdapter.setSelectedIndex(position);
         mIMainActivity.onMediaSelected(mSelectedArtist.getArtist_id(),mMediaList.get(position),position);
+        saveLastSongProperties();
+    }
+
+    private void saveLastSongProperties() {
+        mIMainActivity.getMyPrefManager().setPlaylistId(mSelectedArtist.getArtist_id());
     }
 }
 
