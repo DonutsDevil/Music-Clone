@@ -1,5 +1,7 @@
 package com.example.music_clone.ui;
 
+import android.support.v4.media.MediaMetadataCompat;
+
 import com.example.music_clone.MyApplication;
 import com.example.music_clone.models.Artist;
 
@@ -11,4 +13,5 @@ public interface IMainActivity {
     void setActionBarTitle(String title);
     void playPause();
     MyApplication getMyApplication();
+    void onMediaSelected(MediaMetadataCompat mediaItem);
 }

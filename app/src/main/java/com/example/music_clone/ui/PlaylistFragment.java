@@ -145,6 +145,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mIMainActivity.getMyApplication().setMediaItems(mMediaList);
         mSelectedMedia = mMediaList.get(position);
         mAdapter.setSelectedIndex(position);
+        mIMainActivity.onMediaSelected(mSelectedMedia);
     }
 }
 

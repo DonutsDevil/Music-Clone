@@ -1,8 +1,11 @@
 package com.example.music_clone.ui;
 
 import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,6 +58,17 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     @Override
     public MyApplication getMyApplication() {
         return mMyApplication;
+    }
+
+    @Override
+    public void onMediaSelected(MediaMetadataCompat mediaItem) {
+        if (mediaItem != null) {
+            Log.d(TAG, "onMediaSelected: called = " +mediaItem.getDescription().getMediaId());
+            mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),null);
+        }
+        else {
+            Toast.makeText(this, "Select Something to play", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
 
+import com.example.music_clone.MyApplication;
 import com.example.music_clone.players.MediaPlayerAdapter;
 import com.example.music_clone.players.PlayerAdapter;
 import com.example.music_clone.util.MediaLibrary;
@@ -24,12 +25,11 @@ public class MediaService extends MediaBrowserServiceCompat {
     private static final String TAG = "MediaService";
     private MediaSessionCompat mSession;
     private PlayerAdapter mPlayback;
-    private MediaLibrary mMediaLibrary;
-
-    @Override
+    private MyApplication mMyApplication
+;    @Override
     public void onCreate()  {
         super.onCreate();
-        mMediaLibrary = new MediaLibrary();
+        mMyApplication = MyApplication.getInstance();
         mSession = new MediaSessionCompat(this,TAG);
         mSession.setFlags(
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -71,7 +71,7 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         if(clientPackageName.equals(getApplicationContext().getPackageName())) {
             // allowed to browser media
-            return new BrowserRoot("some_fake_playlist",null);
+            return new BrowserRoot("some_real_playlist",null);
         }
         return new BrowserRoot("empty_media",null);
     }
@@ -84,7 +84,7 @@ public class MediaService extends MediaBrowserServiceCompat {
             result.sendResult(null);
             return;
         }
-        result.sendResult(MediaLibrary.getMediaItems());
+        result.sendResult(mMyApplication.getMediaItems()); // return all available media
     }
 
     public class MediaSessionCallbacks extends MediaSessionCompat.Callback {
@@ -96,6 +96,12 @@ public class MediaService extends MediaBrowserServiceCompat {
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             Log.d(TAG, "onPlayFromMediaId: Called");
+            mPreparedMedia = mMyApplication.getMediaItem(mediaId);
+            mSession.setMetadata(mPreparedMedia);
+            if (!mSession.isActive()) {
+                mSession.setActive(true);
+            }
+            mPlayback.playFromMedia(mPreparedMedia);
         }
 
         @Override
@@ -104,7 +110,7 @@ public class MediaService extends MediaBrowserServiceCompat {
                 return;
             }
             String mediaId = mPlayList.get(mQueueIndex).getDescription().getMediaId();
-            mPreparedMedia = mMediaLibrary.getTreeMap().get(mediaId);
+            mPreparedMedia = mMyApplication.getMediaItem(mediaId);
 
             if(!mSession.isActive()) {
                 mSession.setActive(true);
