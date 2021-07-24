@@ -21,6 +21,8 @@ import com.example.music_clone.util.MediaLibrary;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
+
 public class MediaService extends MediaBrowserServiceCompat {
     private static final String TAG = "MediaService";
     private MediaSessionCompat mSession;
@@ -102,6 +104,13 @@ public class MediaService extends MediaBrowserServiceCompat {
                 mSession.setActive(true);
             }
             mPlayback.playFromMedia(mPreparedMedia);
+
+            int newQueuePosition = extras.getInt(MEDIA_QUEUE_POSITION,-1);
+            if (newQueuePosition == -1) {
+                mQueueIndex++;
+            }else {
+                mQueueIndex = newQueuePosition;
+            }
         }
 
         @Override

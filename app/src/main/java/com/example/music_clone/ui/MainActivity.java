@@ -22,6 +22,8 @@ import com.example.music_clone.util.MainActivityFragmentManager;
 
 import java.util.ArrayList;
 
+import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
+
 public class MainActivity extends AppCompatActivity implements IMainActivity {
 
     private static final String TAG = "MainActivity";
@@ -61,11 +63,13 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     }
 
     @Override
-    public void onMediaSelected(String playlistId, MediaMetadataCompat mediaItem) {
+    public void onMediaSelected(String playlistId, MediaMetadataCompat mediaItem, int queuePosition) {
         if (mediaItem != null) {
             Log.d(TAG, "onMediaSelected: called = " +mediaItem.getDescription().getMediaId());
             mMediaBrowserHelper.subscribeToNewPlaylist(playlistId);
-            mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),null);
+            Bundle bundle = new Bundle();
+            bundle.putInt(MEDIA_QUEUE_POSITION, queuePosition);
+            mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
         }
         else {
             Toast.makeText(this, "Select Something to play", Toast.LENGTH_SHORT).show();
