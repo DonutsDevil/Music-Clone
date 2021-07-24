@@ -61,9 +61,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     }
 
     @Override
-    public void onMediaSelected(MediaMetadataCompat mediaItem) {
+    public void onMediaSelected(String playlistId, MediaMetadataCompat mediaItem) {
         if (mediaItem != null) {
             Log.d(TAG, "onMediaSelected: called = " +mediaItem.getDescription().getMediaId());
+            mMediaBrowserHelper.subscribeToNewPlaylist(playlistId);
             mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),null);
         }
         else {

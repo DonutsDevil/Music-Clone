@@ -13,5 +13,5 @@ public interface IMainActivity {
     void setActionBarTitle(String title);
     void playPause();
     MyApplication getMyApplication();
-    void onMediaSelected(MediaMetadataCompat mediaItem);
+    void onMediaSelected(String playlistId, MediaMetadataCompat mediaItem);
 }

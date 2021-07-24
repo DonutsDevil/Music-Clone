@@ -29,6 +29,9 @@ public class MediaBrowserHelper {
         mMediaBrowserConnectionCallback = new MediaBrowserConnectionCallback();
     }
 
+    public void subscribeToNewPlaylist(String playlistId) {
+        mMediaBrowser.subscribe(playlistId,mMediaBrowserSubscriptionCallback );
+    }
     public void onStart() {
         if(mMediaBrowser == null) {
             mMediaBrowser = new MediaBrowserCompat(
