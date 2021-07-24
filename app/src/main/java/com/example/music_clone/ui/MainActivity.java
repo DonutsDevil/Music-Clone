@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.music_clone.MyApplication;
 import com.example.music_clone.R;
 import com.example.music_clone.client.MediaBrowserHelper;
 import com.example.music_clone.models.Artist;
@@ -27,13 +28,14 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
 
     // Vars
     private MediaBrowserHelper mMediaBrowserHelper;
+    private MyApplication mMyApplication;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mProgressBar = findViewById(R.id.progress_bar);
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
-
+        mMyApplication = MyApplication.getInstance();
         if (savedInstanceState == null) {
             loadFragment(HomeFragment.newInstance(), true);
         }
@@ -47,6 +49,12 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
             mMediaBrowserHelper.getTransportControls().play();
             mIsPlaying = true;
         }
+    }
+
+    // This is used to set Playlist in the whole app.
+    @Override
+    public MyApplication getMyApplication() {
+        return mMyApplication;
     }
 
     @Override

@@ -142,7 +142,9 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
 
     @Override
     public void onMediaSelected(int position) {
-
+        mIMainActivity.getMyApplication().setMediaItems(mMediaList);
+        mSelectedMedia = mMediaList.get(position);
+        mAdapter.setSelectedIndex(position);
     }
 }
 

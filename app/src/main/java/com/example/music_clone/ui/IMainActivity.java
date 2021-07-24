@@ -1,5 +1,6 @@
 package com.example.music_clone.ui;
 
+import com.example.music_clone.MyApplication;
 import com.example.music_clone.models.Artist;
 
 public interface IMainActivity {
@@ -9,4 +10,5 @@ public interface IMainActivity {
     void onArtistSelected(String category, Artist artist);
     void setActionBarTitle(String title);
     void playPause();
+    MyApplication getMyApplication();
 }
