@@ -49,7 +49,9 @@ public class MediaControllerFragment extends Fragment implements
         mPlayPause.setOnClickListener(this);
     }
 
-
+    public MediaSeekBar getMediaSeekBar(){
+        return mSeekbarAudio;
+    }
     @Override
     public void onClick(View v) {
         if (v.getId()==R.id.play_pause) {

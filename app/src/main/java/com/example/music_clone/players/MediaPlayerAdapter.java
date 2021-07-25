@@ -2,6 +2,7 @@ package com.example.music_clone.players;
 
 import  android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -159,7 +160,23 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
     }
 
     private void startTrackingPlayback() {
-
+        // Begin tracking the playback
+        final Handler handler = new Handler();
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isPlaying()) {
+                    // send updates
+                    mPlaybackInfoListener.seekTo(mExoPlayer.getContentPosition(),mExoPlayer.getDuration());
+                    handler.postDelayed(this,100);
+                }
+                if (mExoPlayer.getContentPosition() >= mExoPlayer.getDuration()
+                        && mExoPlayer.getDuration() > 0) {
+                        mPlaybackInfoListener.onPlaybackComplete();
+                }
+            }
+        };
+        handler.postDelayed(runnable,100);
     }
     // This is the main reducer for the player state machine.
     private void setNewState(@PlaybackStateCompat.State int newPlayerState) {

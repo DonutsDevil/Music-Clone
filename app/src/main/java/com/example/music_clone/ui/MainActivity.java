@@ -1,5 +1,9 @@
 package com.example.music_clone.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -28,6 +32,8 @@ import java.util.ArrayList;
 
 import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.example.music_clone.util.Constants.QUEUE_NEW_PLAYLIST;
+import static com.example.music_clone.util.Constants.SEEK_BAR_MAX;
+import static com.example.music_clone.util.Constants.SEEK_BAR_PROGRESS;
 
 public class MainActivity extends AppCompatActivity implements
         IMainActivity, MediaBrowserHelperCallback
@@ -43,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements
     private MyApplication mMyApplication;
     private MyPreferenceManager mMyPrefManager;
     private boolean mIsPlaying;
-
+    private SeekBarBroadcastReceiver mSeekBarBroadcastReceiver;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +67,42 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initSeekBarBroadcastReceiver();
+    }
+
+    private void initSeekBarBroadcastReceiver(){
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(getString(R.string.broadcast_seekbar_update));
+        mSeekBarBroadcastReceiver  = new SeekBarBroadcastReceiver();
+        registerReceiver(mSeekBarBroadcastReceiver,intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mSeekBarBroadcastReceiver != null) {
+            unregisterReceiver(mSeekBarBroadcastReceiver);
+        }
+    }
+
+    private class SeekBarBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long seekProgress = intent.getLongExtra(SEEK_BAR_PROGRESS,0);
+            long maxProgress = intent.getLongExtra(SEEK_BAR_MAX,0);
+
+//            if (getMediaControllerFragment().getMediaSeekBar().isTracking()) {
+//                getMediaControllerFragment().getMediaSeekBar().setProgress((int)seekProgress);
+//                getMediaControllerFragment().getMediaSeekBar().setMax((int)maxProgress);
+//            }
+            getMediaControllerFragment().getMediaSeekBar().setProgress((int)seekProgress);
+            getMediaControllerFragment().getMediaSeekBar().setMax((int)maxProgress);
+        }
+    }
     @Override
     public void playPause() {
         Log.d(TAG, "playPause: mIsPlaying : "+mIsPlaying);

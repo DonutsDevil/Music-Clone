@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
 
 import com.example.music_clone.MyApplication;
+import com.example.music_clone.R;
 import com.example.music_clone.players.MediaPlayerAdapter;
 import com.example.music_clone.players.PlaybackInfoListener;
 import com.example.music_clone.players.PlayerAdapter;
@@ -25,6 +26,8 @@ import java.util.List;
 
 import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.example.music_clone.util.Constants.QUEUE_NEW_PLAYLIST;
+import static com.example.music_clone.util.Constants.SEEK_BAR_MAX;
+import static com.example.music_clone.util.Constants.SEEK_BAR_PROGRESS;
 
 public class MediaService extends MediaBrowserServiceCompat {
 
@@ -146,7 +149,7 @@ public class MediaService extends MediaBrowserServiceCompat {
             Log.d(TAG, "onPlay: is called");
 
             /*if (!isReadyToPlay()) {
-                Test this code
+//                Test this code
                 Log.d(TAG, "onPlay: is return from if ");
                 return;
             }*/
@@ -219,6 +222,21 @@ public class MediaService extends MediaBrowserServiceCompat {
         public void onPlaybackStateChange(PlaybackStateCompat state) {
             Log.d(TAG, "onPlaybackStateChange: called when clicked");
             mSession.setPlaybackState(state);
+        }
+
+        @Override
+        public void seekTo(long progress, long max) {
+            Intent intent  = new Intent();
+            intent.setAction(getString(R.string.broadcast_seekbar_update));
+            intent.putExtra(SEEK_BAR_PROGRESS,progress);
+            intent.putExtra(SEEK_BAR_MAX,max);
+            sendBroadcast(intent);
+        }
+
+        @Override
+        public void onPlaybackComplete() {
+            Log.d(TAG, "onPlaybackComplete: SKIPPING TO NEXT");
+            mSession.getController().getTransportControls().skipToNext();
         }
     }
 }
