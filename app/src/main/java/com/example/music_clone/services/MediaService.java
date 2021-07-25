@@ -27,14 +27,18 @@ import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.example.music_clone.util.Constants.QUEUE_NEW_PLAYLIST;
 
 public class MediaService extends MediaBrowserServiceCompat {
+
     private static final String TAG = "MediaService";
+
     private MediaSessionCompat mSession;
     private PlayerAdapter mPlayback;
-    private MyApplication mMyApplication
-;    @Override
+    private MyApplication mMyApplication;
+
+    @Override
     public void onCreate()  {
         super.onCreate();
         mMyApplication = MyApplication.getInstance();
+        //Build the MediaSession
         mSession = new MediaSessionCompat(this,TAG);
         mSession.setFlags(
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -125,10 +129,12 @@ public class MediaService extends MediaBrowserServiceCompat {
         @Override
         public void onPrepare() {
             if (mQueueIndex < 0 && mPlayList.isEmpty()) {
+                // Return Nothing to play.
                 return;
             }
             String mediaId = mPlayList.get(mQueueIndex).getDescription().getMediaId();
             mPreparedMedia = mMyApplication.getMediaItem(mediaId);
+            mSession.setMetadata(mPreparedMedia);
 
             if(!mSession.isActive()) {
                 mSession.setActive(true);
@@ -137,9 +143,13 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         @Override
         public void onPlay() {
-            if (!isReadyToPlay()) {
+            Log.d(TAG, "onPlay: is called");
+
+            /*if (!isReadyToPlay()) {
+                Test this code
+                Log.d(TAG, "onPlay: is return from if ");
                 return;
-            }
+            }*/
 
             if(mPreparedMedia == null) {
                 onPrepare();
@@ -150,6 +160,7 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         @Override
         public void onPause() {
+            Log.d(TAG, "onPause: is called");
             mPlayback.pause();
         }
 
@@ -197,14 +208,16 @@ public class MediaService extends MediaBrowserServiceCompat {
         }
 
         private boolean isReadyToPlay() {
-            return !mPlayList.isEmpty();
+            return (!mPlayList.isEmpty());
         }
     }
 
     private class MediaPlayerListener implements PlaybackInfoListener {
 
+        // Report the state to the MediaSession.
         @Override
         public void onPlaybackStateChange(PlaybackStateCompat state) {
+            Log.d(TAG, "onPlaybackStateChange: called when clicked");
             mSession.setPlaybackState(state);
         }
     }

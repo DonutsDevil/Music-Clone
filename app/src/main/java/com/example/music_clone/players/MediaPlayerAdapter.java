@@ -22,14 +22,15 @@ import com.google.android.exoplayer2.util.SystemClock;
 import com.google.android.exoplayer2.util.Util;
 
 public class    MediaPlayerAdapter extends PlayerAdapter {
+
     private static final String TAG = "MediaPlayerAdapter";
+
     private Context mContext;
     private MediaMetadataCompat mCurrentMedia;
     private boolean mCurrentMediaPlayedToCompletion;
     private int mState;
     // track buffering time in ExoPlayer Buffer state
     private long mStartTime;
-
     private PlaybackInfoListener mPlaybackInfoListener;
 
     // ExoPlayer Objects
@@ -72,7 +73,7 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
 
     @Override
     protected void onPause() {
-        if(mExoPlayer != null && !mExoPlayer.getPlayWhenReady()) {
+        if(mExoPlayer != null && mExoPlayer.getPlayWhenReady()) {
             mExoPlayer.setPlayWhenReady(false);
             setNewState(PlaybackStateCompat.STATE_PAUSED);
         }
@@ -99,6 +100,9 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
 
     @Override
     protected void onStop() {
+        // Regardless of whether or not the ExoPlayer has been created / started, the state must
+        // be updated, so that MediaNotificationManager can take down the notification.
+        Log.d(TAG, "onStop: stopped");
         setNewState(PlaybackStateCompat.STATE_STOPPED);
         release();
     }
@@ -124,6 +128,8 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
         boolean mediaChanged = (mCurrentMedia == null) || !mediaId.equals(mCurrentMedia.getDescription().getMediaId());
         // for looping song
         if(mCurrentMediaPlayedToCompletion) {
+            // Last audio file was played to completion, the resourceId hasn't changed, but the
+            // player was released, so force a reload of the media file for playback.
             mediaChanged = true;
             mCurrentMediaPlayedToCompletion = false;
         }
@@ -143,6 +149,7 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
             MediaSource audioSource = new ProgressiveMediaSource.Factory(mDataSourceFactory)
                     .createMediaSource(Uri.parse(mCurrentMedia.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)));
             mExoPlayer.prepare(audioSource);
+            Log.d(TAG, "onPlayerStateChanged: PREPARE");
         }
         catch (Exception e) {
             throw new RuntimeException("Failed to play media url "
@@ -154,13 +161,17 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
     private void startTrackingPlayback() {
 
     }
-
+    // This is the main reducer for the player state machine.
     private void setNewState(@PlaybackStateCompat.State int newPlayerState) {
         mState = newPlayerState;
+
+        // Whether playback goes to completion, or whether it is stopped, the
+        // mCurrentMediaPlayedToCompletion is set to true.
         if(mState == PlaybackStateCompat.STATE_STOPPED) {
             mCurrentMediaPlayedToCompletion = true;
         }
         final long reportPosition = mExoPlayer == null ? 0 : mExoPlayer.getCurrentPosition();
+        // Send playback state information to service
         publishStateBuilder(reportPosition);
     }
 
@@ -171,7 +182,7 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
                 mState,
                 reportPosition,
                 1.0f,
-                SystemClock.DEFAULT.elapsedRealtime()
+                android.os.SystemClock.elapsedRealtime()
         );
         mPlaybackInfoListener.onPlaybackStateChange(stateBuilder.build());
     }
@@ -220,6 +231,7 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
                     break;
                 }
                 case Player.STATE_BUFFERING: {
+                    Log.d(TAG, "onPlayerStateChanged: BUFFERING");
                     mStartTime = System.currentTimeMillis();
                     break;
                 }
@@ -228,6 +240,7 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
                     break;
                 }
                 case Player.STATE_READY: {
+                    Log.d(TAG, "onPlayerStateChanged: READY");
                     Log.d(TAG, "onPlayerStateChanged: Time ELAPSED "+(System.currentTimeMillis() - mStartTime));
                     break;
                 }

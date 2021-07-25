@@ -4,6 +4,7 @@ package com.example.music_clone.ui;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,15 +43,17 @@ public class MediaControllerFragment extends Fragment implements
 
     @Override
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
-        mSongTitle = view.findViewById(R.id.media_title);
+        mSongTitle = view.findViewById(R.id.media_song_title);
         mPlayPause = view.findViewById(R.id.play_pause);
         mSeekbarAudio = view.findViewById(R.id.seekbar_audio);
         mPlayPause.setOnClickListener(this);
     }
 
+
     @Override
     public void onClick(View v) {
         if (v.getId()==R.id.play_pause) {
+            Log.d(TAG, "onClick: called");
             mIMainActivity.playPause();
         }
     }
@@ -70,6 +73,7 @@ public class MediaControllerFragment extends Fragment implements
 
     // Call when we select a song from PlaylistFragment
     public void setMediaTitle(MediaMetadataCompat mediaItem) {
+        Log.d(TAG, "setMediaTitle: MediaBrowserHelper "+mediaItem.getDescription().getTitle());
         mSongTitle.setText(mediaItem.getDescription().getTitle());
     }
 

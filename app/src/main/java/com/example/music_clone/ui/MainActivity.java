@@ -43,15 +43,19 @@ public class MainActivity extends AppCompatActivity implements
     private MyApplication mMyApplication;
     private MyPreferenceManager mMyPrefManager;
     private boolean mIsPlaying;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mProgressBar = findViewById(R.id.progress_bar);
+
         mMyPrefManager = new MyPreferenceManager(this);
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
+
         mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
         mMyApplication = MyApplication.getInstance();
+
         if (savedInstanceState == null) {
             loadFragment(HomeFragment.newInstance(), true);
         }
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void playPause() {
+        Log.d(TAG, "playPause: mIsPlaying : "+mIsPlaying);
         if(mIsPlaying) {
             mMediaBrowserHelper.getTransportControls().pause();
         }else {
@@ -210,12 +215,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onPlaybackStateChanged(PlaybackStateCompat state) {
-        mIsPlaying = state!=null &&
+    public void onPlaybackStateChanged(final PlaybackStateCompat state) {
+
+        mIsPlaying = state != null &&
                 state.getState() == PlaybackStateCompat.STATE_PLAYING;
+        Log.d(TAG, "onPlaybackStateChanged: called mIsPlaying = "+mIsPlaying    );
         // Update UI
-        if (getMediaControllerFragment() != null)
-                getMediaControllerFragment().setIsPlaying(mIsPlaying);
+        if (getMediaControllerFragment() != null) {
+            getMediaControllerFragment().setIsPlaying(mIsPlaying);
+        }
     }
 
     private  MediaControllerFragment getMediaControllerFragment() {
