@@ -18,9 +18,10 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.SystemClock;
 import com.google.android.exoplayer2.util.Util;
 
-public class MediaPlayerAdapter extends PlayerAdapter {
+public class    MediaPlayerAdapter extends PlayerAdapter {
     private static final String TAG = "MediaPlayerAdapter";
     private Context mContext;
     private MediaMetadataCompat mCurrentMedia;
@@ -29,15 +30,18 @@ public class MediaPlayerAdapter extends PlayerAdapter {
     // track buffering time in ExoPlayer Buffer state
     private long mStartTime;
 
+    private PlaybackInfoListener mPlaybackInfoListener;
+
     // ExoPlayer Objects
     private SimpleExoPlayer mExoPlayer;
     private TrackSelector mTrackSelector;
     private DefaultRenderersFactory mRenderer;
     private DataSource.Factory mDataSourceFactory;
 
-    public MediaPlayerAdapter(@NonNull Context context) {
+    public MediaPlayerAdapter(@NonNull Context context, PlaybackInfoListener playbackInfoListener) {
         super(context);
-        mContext = context;
+        mContext = context.getApplicationContext();
+        mPlaybackInfoListener = playbackInfoListener;
     }
 
     private void initializeExoPlayer(){
@@ -157,8 +161,20 @@ public class MediaPlayerAdapter extends PlayerAdapter {
             mCurrentMediaPlayedToCompletion = true;
         }
         final long reportPosition = mExoPlayer == null ? 0 : mExoPlayer.getCurrentPosition();
+        publishStateBuilder(reportPosition);
     }
 
+    private void publishStateBuilder(long reportPosition) {
+        final PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder();
+        stateBuilder.setActions(getAvailableActions());
+        stateBuilder.setState(
+                mState,
+                reportPosition,
+                1.0f,
+                SystemClock.DEFAULT.elapsedRealtime()
+        );
+        mPlaybackInfoListener.onPlaybackStateChange(stateBuilder.build());
+    }
     /**
      * Set the current capabilities available on this session. Note: If a capability is not
      * listed in the bitmask of capabilities then the MediaSession will not handle it. For

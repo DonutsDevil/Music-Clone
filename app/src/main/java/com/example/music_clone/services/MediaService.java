@@ -6,6 +6,7 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,6 +16,7 @@ import androidx.media.MediaBrowserServiceCompat;
 
 import com.example.music_clone.MyApplication;
 import com.example.music_clone.players.MediaPlayerAdapter;
+import com.example.music_clone.players.PlaybackInfoListener;
 import com.example.music_clone.players.PlayerAdapter;
 import com.example.music_clone.util.MediaLibrary;
 
@@ -45,7 +47,7 @@ public class MediaService extends MediaBrowserServiceCompat {
         // A token that can be used to create a MediaController for this session
         setSessionToken(mSession.getSessionToken());
 
-        mPlayback = new MediaPlayerAdapter(this);
+        mPlayback = new MediaPlayerAdapter(this, new MediaPlayerListener());
     }
 
     /*
@@ -196,6 +198,14 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         private boolean isReadyToPlay() {
             return !mPlayList.isEmpty();
+        }
+    }
+
+    private class MediaPlayerListener implements PlaybackInfoListener {
+
+        @Override
+        public void onPlaybackStateChange(PlaybackStateCompat state) {
+            mSession.setPlaybackState(state);
         }
     }
 }

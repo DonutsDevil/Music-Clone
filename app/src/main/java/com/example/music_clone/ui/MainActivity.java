@@ -2,6 +2,7 @@ package com.example.music_clone.ui;
 
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -16,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.music_clone.MyApplication;
 import com.example.music_clone.R;
 import com.example.music_clone.client.MediaBrowserHelper;
+import com.example.music_clone.client.MediaBrowserHelperCallback;
 import com.example.music_clone.models.Artist;
 import com.example.music_clone.services.MediaService;
 import com.example.music_clone.util.MainActivityFragmentManager;
@@ -26,7 +28,9 @@ import java.util.ArrayList;
 import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.example.music_clone.util.Constants.QUEUE_NEW_PLAYLIST;
 
-public class MainActivity extends AppCompatActivity implements IMainActivity {
+public class MainActivity extends AppCompatActivity implements
+        IMainActivity, MediaBrowserHelperCallback
+{
 
     private static final String TAG = "MainActivity";
 
@@ -37,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     private MediaBrowserHelper mMediaBrowserHelper;
     private MyApplication mMyApplication;
     private MyPreferenceManager mMyPrefManager;
+    private boolean mIsPlaying;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,12 +49,13 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
         mProgressBar = findViewById(R.id.progress_bar);
         mMyPrefManager = new MyPreferenceManager(this);
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
+        mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
         mMyApplication = MyApplication.getInstance();
         if (savedInstanceState == null) {
             loadFragment(HomeFragment.newInstance(), true);
         }
     }
-    private boolean mIsPlaying;
+
     @Override
     public void playPause() {
         if(mIsPlaying) {
@@ -194,4 +200,14 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     }
 
 
+    @Override
+    public void onMetaDataChanged(MediaMetadataCompat metadata) {
+
+    }
+
+    @Override
+    public void onPlaybackStateChanged(PlaybackStateCompat state) {
+        mIsPlaying = state!=null &&
+                state.getState() == PlaybackStateCompat.STATE_PLAYING;
+    }
 }
