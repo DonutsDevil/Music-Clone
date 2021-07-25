@@ -95,12 +95,10 @@ public class MainActivity extends AppCompatActivity implements
             long seekProgress = intent.getLongExtra(SEEK_BAR_PROGRESS,0);
             long maxProgress = intent.getLongExtra(SEEK_BAR_MAX,0);
 
-//            if (getMediaControllerFragment().getMediaSeekBar().isTracking()) {
-//                getMediaControllerFragment().getMediaSeekBar().setProgress((int)seekProgress);
-//                getMediaControllerFragment().getMediaSeekBar().setMax((int)maxProgress);
-//            }
-            getMediaControllerFragment().getMediaSeekBar().setProgress((int)seekProgress);
-            getMediaControllerFragment().getMediaSeekBar().setMax((int)maxProgress);
+            if (!getMediaControllerFragment().getMediaSeekBar().isTracking()) {
+                getMediaControllerFragment().getMediaSeekBar().setProgress((int)seekProgress);
+                getMediaControllerFragment().getMediaSeekBar().setMax((int)maxProgress);
+            }
         }
     }
     @Override
@@ -156,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
+        getMediaControllerFragment().getMediaSeekBar().disconnectController();
         mMediaBrowserHelper.onStop();
     }
 
@@ -266,6 +265,11 @@ public class MainActivity extends AppCompatActivity implements
         if (getMediaControllerFragment() != null) {
             getMediaControllerFragment().setIsPlaying(mIsPlaying);
         }
+    }
+
+    @Override
+    public void onMediaControllerConnected(MediaControllerCompat mediaController) {
+        getMediaControllerFragment().getMediaSeekBar().setMediaController(mediaController);
     }
 
     private  MediaControllerFragment getMediaControllerFragment() {

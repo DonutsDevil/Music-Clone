@@ -101,6 +101,7 @@ public class MediaBrowserHelper {
                 // Get a MediaController for the MediaSession.
                 mMediaController = new MediaControllerCompat(mContext,mMediaBrowser.getSessionToken());
                 mMediaController.registerCallback(mMediaControllerCallback);
+                mMediaBrowserCallback.onMediaControllerConnected(mMediaController);
             }
             catch (Exception e) {
                 Log.d(TAG, "onConnected: connection problem "+e.toString());
