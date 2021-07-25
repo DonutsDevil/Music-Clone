@@ -2,6 +2,7 @@ package com.example.music_clone.ui;
 
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
@@ -59,10 +60,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void playPause() {
         if(mIsPlaying) {
-            mMediaBrowserHelper.getTransportControls().skipToNext();
+            mMediaBrowserHelper.getTransportControls().pause();
         }else {
             mMediaBrowserHelper.getTransportControls().play();
-            mIsPlaying = true;
         }
     }
 
@@ -202,12 +202,29 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onMetaDataChanged(MediaMetadataCompat metadata) {
-
+        if (metadata == null) {
+            return;
+        }
+        if (getMediaControllerFragment() != null)
+        getMediaControllerFragment().setMediaTitle(metadata);
     }
 
     @Override
     public void onPlaybackStateChanged(PlaybackStateCompat state) {
         mIsPlaying = state!=null &&
                 state.getState() == PlaybackStateCompat.STATE_PLAYING;
+        // Update UI
+        if (getMediaControllerFragment() != null)
+                getMediaControllerFragment().setIsPlaying(mIsPlaying);
     }
+
+    private  MediaControllerFragment getMediaControllerFragment() {
+        MediaControllerFragment mediaControllerFragment = (MediaControllerFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.bottom_media_controller);
+        if (mediaControllerFragment != null) {
+            return mediaControllerFragment;
+        }
+        return null;
+    }
+
 }
