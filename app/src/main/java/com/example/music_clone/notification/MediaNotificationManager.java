@@ -1,13 +1,24 @@
 package com.example.music_clone.notification;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.MediaDescription;
+import android.media.session.PlaybackState;
 import android.os.Build;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
+import com.example.music_clone.R;
 import com.example.music_clone.services.MediaService;
 
 public class MediaNotificationManager {
@@ -40,11 +51,39 @@ public class MediaNotificationManager {
             Log.d(TAG, "createChannel: new Notification channel created");
         }
         else {
-            Log.d(TAG, "createChannel: notification channel already exists");
+            Log.d(TAG, "createChannel: notification channel reused");
         }
     }
 
     private boolean isAndroidOOrHigher(){
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
     }
+
+    private Notification buildNotification(@NonNull PlaybackStateCompat state,
+                                           MediaSessionCompat.Token token,
+                                           final MediaDescriptionCompat description,
+                                           Bitmap bitmap)
+    {
+
+        if (isAndroidOOrHigher()) {
+            createChannel();
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(mMediaService,CHANNEL_ID);
+        builder.setStyle(
+                new androidx.media.app.NotificationCompat.MediaStyle()
+                .setMediaSession(token)
+                .setShowActionsInCompactView(0,1,2)
+               ).setColor(ContextCompat.getColor(mMediaService, R.color.notification_bg))
+                .setSmallIcon(R.drawable.ic_audiotrack_white_24dp)
+                .setContentIntent(null)
+                .setContentTitle(description.getTitle())
+                .setContentText(description.getSubtitle())
+                .setLargeIcon(bitmap)
+                .setDeleteIntent(null)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        return builder.build();
+    }
+
+
 }
