@@ -1,6 +1,7 @@
 package com.example.music_clone.services;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -20,6 +21,7 @@ import com.example.music_clone.players.MediaPlayerAdapter;
 import com.example.music_clone.players.PlaybackInfoListener;
 import com.example.music_clone.players.PlayerAdapter;
 import com.example.music_clone.util.MediaLibrary;
+import com.example.music_clone.util.MyPreferenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ public class MediaService extends MediaBrowserServiceCompat {
     private MediaSessionCompat mSession;
     private PlayerAdapter mPlayback;
     private MyApplication mMyApplication;
+    private MyPreferenceManager mMyPrefManger;
 
     @Override
     public void onCreate()  {
@@ -55,6 +58,7 @@ public class MediaService extends MediaBrowserServiceCompat {
         setSessionToken(mSession.getSessionToken());
 
         mPlayback = new MediaPlayerAdapter(this, new MediaPlayerListener());
+        mMyPrefManger = new MyPreferenceManager(this);
     }
 
     /*
@@ -127,6 +131,8 @@ public class MediaService extends MediaBrowserServiceCompat {
             }else {
                 mQueueIndex = newQueuePosition;
             }
+            mMyPrefManger.saveQueuePosition(mQueueIndex);
+            mMyPrefManger.saveLastPlayedMedia(mPreparedMedia.getDescription().getMediaId());
         }
 
         @Override
@@ -159,6 +165,8 @@ public class MediaService extends MediaBrowserServiceCompat {
             }
 
             mPlayback.playFromMedia(mPreparedMedia);
+            mMyPrefManger.saveQueuePosition(mQueueIndex);
+            mMyPrefManger.saveLastPlayedMedia(mPreparedMedia.getDescription().getMediaId());
         }
 
         @Override

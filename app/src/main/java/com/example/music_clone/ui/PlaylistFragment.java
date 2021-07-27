@@ -82,6 +82,17 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
             mAdapter.setSelectedIndex(savedInstanceState.getInt("selected_index"));
         }
     }
+
+    private void getSelectedMediaItem(String mediaId) {
+        for (MediaMetadataCompat mediaItem: mMediaList) {
+            if (mediaItem.getDescription().getMediaId().equals(mediaId)) {
+                mSelectedMedia = mediaItem;
+                mAdapter.setSelectedIndex(mAdapter.getIndexOfItem(mSelectedMedia));
+                break;
+            }
+        }
+    }
+
     private void retrieveMedia(){
         mIMainActivity.showProgressBar();
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
@@ -124,6 +135,10 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private void updateDataSet() {
         mIMainActivity.hideProgressBar();
         mAdapter.notifyDataSetChanged();
+
+        if (mIMainActivity.getMyPrefManager().getLastPlayedArtist().equals(mSelectedArtist.getArtist_id())) {
+            getSelectedMediaItem(mIMainActivity.getMyPrefManager().getLastPlayedMedia());
+        }
     }
     private void initRecyclerView(View view) {
         mRecyclerView = view.findViewById(R.id.recycler_view);
@@ -153,7 +168,11 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     }
 
     private void saveLastSongProperties() {
-        mIMainActivity.getMyPrefManager().setPlaylistId(mSelectedArtist.getArtist_id());
+        mIMainActivity.getMyPrefManager().savePlaylistId(mSelectedArtist.getArtist_id());
+        mIMainActivity.getMyPrefManager().saveLastPlayedArtist(mSelectedArtist.getArtist_id());
+        mIMainActivity.getMyPrefManager().saveLastPlayedCategory(mSelectedCategory);
+        mIMainActivity.getMyPrefManager().saveLastPlayedArtistImage(mSelectedArtist.getImage());
+        mIMainActivity.getMyPrefManager().saveLastPlayedMedia(mSelectedMedia.getDescription().getMediaId());
     }
 
     public void updateUI(MediaMetadataCompat mediaItem) {
