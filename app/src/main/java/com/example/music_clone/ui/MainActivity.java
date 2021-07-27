@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements
         super.onPause();
         if (mSeekBarBroadcastReceiver != null) {
             unregisterReceiver(mSeekBarBroadcastReceiver);
+        }
+        if (mUpdateUIBroadcastReceiver != null) {
             unregisterReceiver(mUpdateUIBroadcastReceiver);
         }
     }

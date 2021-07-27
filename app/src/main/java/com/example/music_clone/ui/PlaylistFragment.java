@@ -78,6 +78,9 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
         initRecyclerView(view);
         mIMainActivity.setActionBarTitle(mSelectedArtist.getTitle());
+        if (savedInstanceState != null) {
+            mAdapter.setSelectedIndex(savedInstanceState.getInt("selected_index"));
+        }
     }
     private void retrieveMedia(){
         mIMainActivity.showProgressBar();
@@ -157,6 +160,12 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mAdapter.setSelectedIndex(mAdapter.getIndexOfItem(mediaItem));
         mSelectedMedia = mediaItem;
         saveLastSongProperties();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("selected_index",mAdapter.getSelectedIndex());
     }
 }
 

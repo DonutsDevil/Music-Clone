@@ -56,6 +56,9 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         return mMediaList.size();
     }
 
+    public int getSelectedIndex(){
+        return mSelectedIndex;
+    }
     public void setSelectedIndex(int index) {
         mSelectedIndex = index;
         notifyDataSetChanged();

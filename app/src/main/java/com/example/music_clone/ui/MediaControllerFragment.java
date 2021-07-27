@@ -30,6 +30,8 @@ public class MediaControllerFragment extends Fragment implements
     private TextView mSongTitle;
     private ImageView mPlayPause;
     private MediaSeekBar mSeekbarAudio;
+    private boolean mIsPlaying;
+    private MediaMetadataCompat mSelectedMedia;
 
     // Vars
     private IMainActivity mIMainActivity;
@@ -47,6 +49,13 @@ public class MediaControllerFragment extends Fragment implements
         mPlayPause = view.findViewById(R.id.play_pause);
         mSeekbarAudio = view.findViewById(R.id.seekbar_audio);
         mPlayPause.setOnClickListener(this);
+        if (savedInstanceState != null) {
+            mSelectedMedia = savedInstanceState.getParcelable("selected_media");
+            if (mSelectedMedia != null) {
+                setMediaTitle(mSelectedMedia);
+                setIsPlaying(savedInstanceState.getBoolean("is_playing"));
+            }
+        }
     }
 
     public MediaSeekBar getMediaSeekBar(){
@@ -62,6 +71,7 @@ public class MediaControllerFragment extends Fragment implements
 
     // Call when we select a song from PlaylistFragment
     public void setIsPlaying(boolean isPlaying) {
+        mIsPlaying = isPlaying;
         if(isPlaying) {
             Glide.with(getActivity())
                     .load(R.drawable.ic_pause_circle_outline_white_24dp)
@@ -76,6 +86,7 @@ public class MediaControllerFragment extends Fragment implements
     // Call when we select a song from PlaylistFragment
     public void setMediaTitle(MediaMetadataCompat mediaItem) {
         Log.d(TAG, "setMediaTitle: MediaBrowserHelper "+mediaItem.getDescription().getTitle());
+        mSelectedMedia = mediaItem;
         mSongTitle.setText(mediaItem.getDescription().getTitle());
     }
 
@@ -83,6 +94,13 @@ public class MediaControllerFragment extends Fragment implements
     public void onAttach(@NonNull  Context context) {
         super.onAttach(context);
         mIMainActivity = ((IMainActivity)getActivity());
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("selected_media",mSelectedMedia);
+        outState.putBoolean("is_playing",mIsPlaying);
     }
 }
 
