@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements
     private MyPreferenceManager mMyPrefManager;
     private boolean mIsPlaying;
     private SeekBarBroadcastReceiver mSeekBarBroadcastReceiver;
+    private UpdateUIBroadcastReceiver mUpdateUIBroadcastReceiver;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         initSeekBarBroadcastReceiver();
+        initUpdateUIBroadcastReceiver();
     }
 
     private void initSeekBarBroadcastReceiver(){
@@ -80,11 +83,31 @@ public class MainActivity extends AppCompatActivity implements
         registerReceiver(mSeekBarBroadcastReceiver,intentFilter);
     }
 
+    private void initUpdateUIBroadcastReceiver(){
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(getString(R.string.broadcast_update_ui));
+        mUpdateUIBroadcastReceiver  = new UpdateUIBroadcastReceiver();
+        registerReceiver(mUpdateUIBroadcastReceiver,intentFilter);
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         if (mSeekBarBroadcastReceiver != null) {
             unregisterReceiver(mSeekBarBroadcastReceiver);
+            unregisterReceiver(mUpdateUIBroadcastReceiver);
+        }
+    }
+
+    private class UpdateUIBroadcastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String mediaId = intent.getStringExtra(getString(R.string.broadcast_new_media_id));
+            Log.d(TAG, "onReceive: new Media id: "+mediaId);
+            if (getPlaylistFragment() != null) {
+                getPlaylistFragment().updateUI(mMyApplication.getMediaItem(mediaId));
+            }
         }
     }
 
@@ -281,4 +304,12 @@ public class MainActivity extends AppCompatActivity implements
         return null;
     }
 
+    private PlaylistFragment getPlaylistFragment() {
+        PlaylistFragment playlistFragment = (PlaylistFragment) getSupportFragmentManager()
+                .findFragmentByTag(getString(R.string.fragment_playlist));
+        if (playlistFragment != null) {
+            return playlistFragment;
+        }
+        return null;
+    }
 }

@@ -22,7 +22,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.SystemClock;
 import com.google.android.exoplayer2.util.Util;
 
-public class    MediaPlayerAdapter extends PlayerAdapter {
+public class  MediaPlayerAdapter extends PlayerAdapter {
 
     private static final String TAG = "MediaPlayerAdapter";
 
@@ -202,6 +202,7 @@ public class    MediaPlayerAdapter extends PlayerAdapter {
                 android.os.SystemClock.elapsedRealtime()
         );
         mPlaybackInfoListener.onPlaybackStateChange(stateBuilder.build());
+        mPlaybackInfoListener.updateUI(mCurrentMedia.getDescription().getMediaId());
     }
     /**
      * Set the current capabilities available on this session. Note: If a capability is not
