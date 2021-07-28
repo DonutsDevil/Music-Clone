@@ -4,11 +4,12 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.session.PlaybackState;
 import android.os.Build;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -25,12 +26,18 @@ import com.example.music_clone.R;
 import com.example.music_clone.services.MediaService;
 import com.example.music_clone.ui.MainActivity;
 
-public class MediaNotificationManager {
+public class MediaNotificationManager extends BroadcastReceiver {
     private static final String TAG = "MediaNotificationManage";
 
     private final MediaService mMediaService;
     private final NotificationManager mNotificationManager;
     private static final String CHANNEL_ID = "com.swapnil.music-clone.musicPlayer.channel01";
+
+
+    private static final String ACTION_PAUSE = "com.example.music_clone.notification.pause";
+    private static final String ACTION_PLAY = "com.example.music_clone.notification.play";
+    private static final String ACTION_NEXT = "com.example.music_clone.notification.next";
+    private static final String ACTION_PREV = "com.example.music_clone.notification.prev";
 
     private final NotificationCompat.Action mPlayAction;
     private final NotificationCompat.Action mPauseAction;
@@ -38,39 +45,65 @@ public class MediaNotificationManager {
     private final NotificationCompat.Action mPrevAction;
 
     public static final int NOTIFICATION_ID = 201;
+    private static final int REQUEST_CODE = 100;
 
     public MediaNotificationManager(MediaService mediaService) {
         this.mMediaService = mediaService;
         mNotificationManager = (NotificationManager)mMediaService.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        String pkg = mediaService.getPackageName();
+        PendingIntent playIntent = PendingIntent.getBroadcast(
+                mMediaService,
+                REQUEST_CODE,
+                new Intent(ACTION_PLAY).setPackage(pkg),
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pauseIntent =
+                PendingIntent.getBroadcast(
+                        mMediaService,
+                        REQUEST_CODE,
+                        new Intent(ACTION_PAUSE).setPackage(pkg),
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent nextIntent =
+                PendingIntent.getBroadcast(
+                        mMediaService,
+                        REQUEST_CODE,
+                        new Intent(ACTION_NEXT).setPackage(pkg),
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent prevIntent =
+                PendingIntent.getBroadcast(
+                        mMediaService,
+                        REQUEST_CODE,
+                        new Intent(ACTION_PREV).setPackage(pkg),
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+
+
         mPlayAction = new NotificationCompat.Action(
                 R.drawable.ic_play_arrow_white_24dp,
                 mMediaService.getString(R.string.label_play),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        mMediaService,
-                        PlaybackStateCompat.ACTION_PLAY)
-        );
+                playIntent);
+
         mPauseAction = new NotificationCompat.Action(
                 R.drawable.ic_pause_circle_outline_white_24dp,
                 mMediaService.getString(R.string.label_pause),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        mMediaService,
-                        PlaybackStateCompat.ACTION_PAUSE)
-        );
+                pauseIntent);
+
         mNextAction = new NotificationCompat.Action(
                 R.drawable.ic_skip_next_white_24dp,
                 mMediaService.getString(R.string.label_next),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        mMediaService,
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
-        );
+                nextIntent);
+
         mPrevAction = new NotificationCompat.Action(
                 R.drawable.ic_skip_previous_white_24dp,
                 mMediaService.getString(R.string.label_previous),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        mMediaService,
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-        );
+                prevIntent);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_NEXT);
+        filter.addAction(ACTION_PAUSE);
+        filter.addAction(ACTION_PLAY);
+        filter.addAction(ACTION_PREV);
+
+        mMediaService.registerReceiver(this,filter);
         // cancel all previously shown notifications
         mNotificationManager.cancelAll();
     }
@@ -164,4 +197,24 @@ public class MediaNotificationManager {
         openUi.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return PendingIntent.getActivity(mMediaService,501,openUi,PendingIntent.FLAG_CANCEL_CURRENT);
     }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        final String action = intent.getAction();
+        switch (action) {
+            case ACTION_PAUSE:
+                mMediaService.getCallback().onPause();
+                break;
+            case ACTION_PLAY:
+                mMediaService.getCallback().onPlay();
+                break;
+            case ACTION_NEXT:
+                mMediaService.getCallback().onSkipToNext();
+                break;
+            case ACTION_PREV:
+                mMediaService.getCallback().onSkipToPrevious();
+                break;
+        }
+    }
+
 }

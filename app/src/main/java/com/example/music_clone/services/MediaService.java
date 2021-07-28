@@ -53,6 +53,7 @@ public class MediaService extends MediaBrowserServiceCompat {
     private MyPreferenceManager mMyPrefManger;
     private MediaNotificationManager mMediaNotificationManager;
     private boolean mIsServiceStarted;
+    private MediaSessionCallbacks mMediaSessionCallback;
 
     @Override
     public void onCreate()  {
@@ -67,7 +68,8 @@ public class MediaService extends MediaBrowserServiceCompat {
                         // (handles the PendingIntents for MediaButtonReceiver.buildMediaButtonPendingIntent)
                 MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS );// Control the items in the queue (aka playlist)
         // See https://developer.android.com/guide/topics/media-apps/mediabuttons for more info on flags
-        mSession.setCallback(new MediaSessionCallbacks());
+        mMediaSessionCallback = new MediaSessionCallbacks();
+        mSession.setCallback(mMediaSessionCallback);
 
         // A token that can be used to create a MediaController for this session
         setSessionToken(mSession.getSessionToken());
@@ -117,6 +119,10 @@ public class MediaService extends MediaBrowserServiceCompat {
             return;
         }
         result.sendResult(mMyApplication.getMediaItems()); // return all available media
+    }
+
+    public MediaSessionCallbacks getCallback(){
+        return mMediaSessionCallback;
     }
 
     public class MediaSessionCallbacks extends MediaSessionCompat.Callback {
