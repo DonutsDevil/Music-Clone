@@ -3,6 +3,8 @@ package com.example.music_clone.services;
 import android.app.Notification;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -17,6 +19,12 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.media.MediaBrowserServiceCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.music_clone.MyApplication;
 import com.example.music_clone.R;
 import com.example.music_clone.notification.MediaNotificationManager;
@@ -28,6 +36,7 @@ import com.example.music_clone.util.MyPreferenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static com.example.music_clone.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.example.music_clone.util.Constants.QUEUE_NEW_PLAYLIST;
@@ -246,7 +255,10 @@ public class MediaService extends MediaBrowserServiceCompat {
                 case PlaybackStateCompat.STATE_PLAYING:
                 case PlaybackStateCompat.STATE_PAUSED:
                     Log.d(TAG, "onPlaybackStateChange: state called 3: playing, 2: paused => "+state.getState());
-                    mServiceManager.displayNotification(state);
+                    mServiceManager.updateNotification(
+                            state,
+                            mPlayback.getCurrentMedia().getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI)
+                    );
                     break;
                 case PlaybackStateCompat.STATE_STOPPED:
                     mServiceManager.moveServiceOutOfStartedState();
@@ -277,18 +289,48 @@ public class MediaService extends MediaBrowserServiceCompat {
             sendBroadcast(intent);
         }
 
-        class ServiceManager {
+        class ServiceManager implements ICallBack{
             private PlaybackStateCompat mState;
+            private String mDisplayImageUri;
+            private Bitmap mCurrentArtistBitmap;
+            private GetArtistBitmapAsyncTask mAsyncTask;
 
             public ServiceManager() {
             }
+            private void updateNotification(PlaybackStateCompat state,String displayImageUri) {
+                mState = state;
+                if (!displayImageUri.equals(mDisplayImageUri)) {
+                    // download bitmap
+                    mAsyncTask = new GetArtistBitmapAsyncTask(
+                            Glide.with(MediaService.this)
+                            .asBitmap()
+                            .load(displayImageUri)
+                            .listener(new RequestListener<Bitmap>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                                    return false;
+                                }
 
-            public void displayNotification(PlaybackStateCompat state) {
+                                @Override
+                                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                    return false;
+                                }
+                            }).submit(), this
+                    );
+                    mAsyncTask.execute();
+                    mDisplayImageUri = displayImageUri;
+                }else {
+                    displayNotification(mCurrentArtistBitmap);
+                }
+
+            }
+
+            public void displayNotification(Bitmap bitmap) {
                 Notification notification = null;
-                switch (state.getState()) {
+                switch (mState.getState()) {
                     case PlaybackStateCompat.STATE_PLAYING: {
                         notification = mMediaNotificationManager.buildNotification(
-                                state,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),null
+                                mState,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),bitmap
                         );
                         if (!mIsServiceStarted) {
                             ContextCompat.startForegroundService(
@@ -304,7 +346,7 @@ public class MediaService extends MediaBrowserServiceCompat {
                     case PlaybackStateCompat.STATE_PAUSED: {
                         stopForeground(false);
                         notification = mMediaNotificationManager.buildNotification(
-                                state,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),null
+                                mState,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),bitmap
                         );
                         mMediaNotificationManager.getNotificationManager()
                                 .notify(MediaNotificationManager.NOTIFICATION_ID,notification);
@@ -317,6 +359,42 @@ public class MediaService extends MediaBrowserServiceCompat {
                 stopSelf();
                 mIsServiceStarted = false;
             }
+
+            @Override
+            public void done(Bitmap bitmap) {
+                mCurrentArtistBitmap = bitmap;
+                displayNotification(mCurrentArtistBitmap);
+            }
+        }
+    }
+
+    static class GetArtistBitmapAsyncTask extends AsyncTask<Void,Void,Bitmap> {
+
+        private FutureTarget<Bitmap> mBitmap;
+        private ICallBack mICallBack;
+
+        public GetArtistBitmapAsyncTask(FutureTarget<Bitmap> mBitmap, ICallBack mICallBack) {
+            this.mBitmap = mBitmap;
+            this.mICallBack = mICallBack;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            mICallBack.done(bitmap);
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... voids) {
+
+            try {
+                return mBitmap.get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 }

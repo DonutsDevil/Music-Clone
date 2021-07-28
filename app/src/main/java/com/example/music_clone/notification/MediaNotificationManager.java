@@ -37,7 +37,7 @@ public class MediaNotificationManager {
     private final NotificationCompat.Action mNextAction;
     private final NotificationCompat.Action mPrevAction;
 
-    public static final int NOTIFICATION_ID = 102;
+    public static final int NOTIFICATION_ID = 201;
 
     public MediaNotificationManager(MediaService mediaService) {
         this.mMediaService = mediaService;
@@ -122,7 +122,8 @@ public class MediaNotificationManager {
                 new androidx.media.app.NotificationCompat.MediaStyle()
                 .setMediaSession(token)
                 .setShowActionsInCompactView(0,1,2)
-               ).setColor(ContextCompat.getColor(mMediaService, R.color.notification_bg))
+               )
+                .setColor(ContextCompat.getColor(mMediaService, R.color.notification_bg))
                 .setSmallIcon(R.drawable.ic_audiotrack_white_24dp)
                 // Pending intent that is fired when user clicks on notification.
                 .setContentIntent(createContentIntent())
