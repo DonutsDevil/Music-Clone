@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
         Log.d(TAG, "onStart: last playlist id: "+getMyPrefManager().getPlaylistId());
         Log.d(TAG, "onStart: last category : "+getMyPrefManager().getLastCategory());
-        if (!getMyPrefManager().getPlaylistId().equals("")) {
+        if (!getMyPrefManager().getLastCategory().equals("")) {
             prepareLastPlayedMedia();
         }
         else{

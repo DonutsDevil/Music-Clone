@@ -43,29 +43,33 @@ public class MediaNotificationManager {
         this.mMediaService = mediaService;
         mNotificationManager = (NotificationManager)mMediaService.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mPlayAction = new NotificationCompat.Action(R.drawable.ic_play_arrow_white_24dp,
+        mPlayAction = new NotificationCompat.Action(
+                R.drawable.ic_play_arrow_white_24dp,
                 mMediaService.getString(R.string.label_play),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(mMediaService,
-                        PlaybackStateCompat.ACTION_PLAY
-                )
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        mMediaService,
+                        PlaybackStateCompat.ACTION_PLAY)
         );
-        mPauseAction = new NotificationCompat.Action(R.drawable.ic_pause_circle_outline_white_24dp,
+        mPauseAction = new NotificationCompat.Action(
+                R.drawable.ic_pause_circle_outline_white_24dp,
                 mMediaService.getString(R.string.label_pause),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(mMediaService,
-                        PlaybackStateCompat.ACTION_PAUSE
-                )
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        mMediaService,
+                        PlaybackStateCompat.ACTION_PAUSE)
         );
-        mNextAction = new NotificationCompat.Action(R.drawable.ic_skip_next_white_24dp,
+        mNextAction = new NotificationCompat.Action(
+                R.drawable.ic_skip_next_white_24dp,
                 mMediaService.getString(R.string.label_next),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(mMediaService,
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-                )
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        mMediaService,
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
         );
-        mPrevAction = new NotificationCompat.Action(R.drawable.ic_skip_previous_white_24dp,
+        mPrevAction = new NotificationCompat.Action(
+                R.drawable.ic_skip_previous_white_24dp,
                 mMediaService.getString(R.string.label_previous),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(mMediaService,
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                )
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        mMediaService,
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
         );
         // cancel all previously shown notifications
         mNotificationManager.cancelAll();

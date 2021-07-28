@@ -68,6 +68,7 @@ public class MediaService extends MediaBrowserServiceCompat {
                 MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS );// Control the items in the queue (aka playlist)
         // See https://developer.android.com/guide/topics/media-apps/mediabuttons for more info on flags
         mSession.setCallback(new MediaSessionCallbacks());
+
         // A token that can be used to create a MediaController for this session
         setSessionToken(mSession.getSessionToken());
 
@@ -165,6 +166,7 @@ public class MediaService extends MediaBrowserServiceCompat {
             }
         }
 
+
         @Override
         public void onPlay() {
             Log.d(TAG, "onPlay: is called");
@@ -239,6 +241,7 @@ public class MediaService extends MediaBrowserServiceCompat {
     }
 
     private class MediaPlayerListener implements PlaybackInfoListener {
+
         private ServiceManager mServiceManager;
 
         public MediaPlayerListener() {
@@ -252,7 +255,11 @@ public class MediaService extends MediaBrowserServiceCompat {
             // Reports the state change to the MediaSession
             mSession.setPlaybackState(state);
             switch (state.getState()) {
-                case PlaybackStateCompat.STATE_PLAYING:
+                case PlaybackStateCompat.STATE_PLAYING:mServiceManager.updateNotification(
+                        state,
+                        mPlayback.getCurrentMedia().getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI)
+                );
+                    break;
                 case PlaybackStateCompat.STATE_PAUSED:
                     Log.d(TAG, "onPlaybackStateChange: state called 3: playing, 2: paused => "+state.getState());
                     mServiceManager.updateNotification(
@@ -290,6 +297,7 @@ public class MediaService extends MediaBrowserServiceCompat {
         }
 
         class ServiceManager implements ICallBack{
+
             private PlaybackStateCompat mState;
             private String mDisplayImageUri;
             private Bitmap mCurrentArtistBitmap;
@@ -333,6 +341,7 @@ public class MediaService extends MediaBrowserServiceCompat {
                                 mState,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),bitmap
                         );
                         if (!mIsServiceStarted) {
+                            Log.d(TAG, "displayNotification: in play is called");
                             ContextCompat.startForegroundService(
                                     MediaService.this,
                                     new Intent(MediaService.this,MediaService.class)

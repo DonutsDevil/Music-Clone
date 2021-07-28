@@ -92,10 +92,13 @@ public class MediaBrowserHelper {
         Log.d(TAG, "onStop: disconnecting from the service");
     }
 
+
     // Receives callbacks from the MediaBrowser when it has successfully connected to the
     // MediaBrowserService (MusicService).
     private class MediaBrowserConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
         // Happens as a result of onStart().
+
+
         @Override
         public void onConnected() {
             Log.d(TAG, "onConnected: Called");
