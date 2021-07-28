@@ -36,6 +36,8 @@ public class MediaNotificationManager {
     private final NotificationCompat.Action mNextAction;
     private final NotificationCompat.Action mPrevAction;
 
+    public static final int NOTIFICATION_ID = 102;
+
     public MediaNotificationManager(MediaService mediaService) {
         this.mMediaService = mediaService;
         mNotificationManager = (NotificationManager)mMediaService.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -70,8 +72,9 @@ public class MediaNotificationManager {
     public NotificationManager getNotificationManager() {
         return mNotificationManager;
     }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private void createChannel(){
+    private void createChannel() {
         if (mNotificationManager.getNotificationChannel(CHANNEL_ID) == null) {
             CharSequence name = "MediaSession";
             String description = "MediaSession for media player";
@@ -93,7 +96,7 @@ public class MediaNotificationManager {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
     }
 
-    private Notification buildNotification(@NonNull PlaybackStateCompat state,
+    public Notification buildNotification(@NonNull PlaybackStateCompat state,
                                            MediaSessionCompat.Token token,
                                            final MediaDescriptionCompat description,
                                            Bitmap bitmap)

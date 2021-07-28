@@ -1,5 +1,6 @@
 package com.example.music_clone.services;
 
+import android.app.Notification;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,10 +14,12 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.media.MediaBrowserServiceCompat;
 
 import com.example.music_clone.MyApplication;
 import com.example.music_clone.R;
+import com.example.music_clone.notification.MediaNotificationManager;
 import com.example.music_clone.players.MediaPlayerAdapter;
 import com.example.music_clone.players.PlaybackInfoListener;
 import com.example.music_clone.players.PlayerAdapter;
@@ -39,6 +42,8 @@ public class MediaService extends MediaBrowserServiceCompat {
     private PlayerAdapter mPlayback;
     private MyApplication mMyApplication;
     private MyPreferenceManager mMyPrefManger;
+    private MediaNotificationManager mMediaNotificationManager;
+    private boolean mIsServiceStarted;
 
     @Override
     public void onCreate()  {
@@ -59,6 +64,7 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         mPlayback = new MediaPlayerAdapter(this, new MediaPlayerListener());
         mMyPrefManger = new MyPreferenceManager(this);
+        mMediaNotificationManager = new MediaNotificationManager(this);
     }
 
     /*
@@ -229,7 +235,9 @@ public class MediaService extends MediaBrowserServiceCompat {
         @Override
         public void onPlaybackStateChange(PlaybackStateCompat state) {
             Log.d(TAG, "onPlaybackStateChange: called when clicked");
+            // Reports the state change to the MediaSession
             mSession.setPlaybackState(state);
+
         }
 
         @Override
@@ -244,7 +252,6 @@ public class MediaService extends MediaBrowserServiceCompat {
         @Override
         public void onPlaybackComplete() {
             Log.d(TAG, "onPlaybackComplete: SKIPPING TO NEXT");
-            mSession.getController().getTransportControls().skipToNext();
         }
 
         @Override
@@ -253,6 +260,46 @@ public class MediaService extends MediaBrowserServiceCompat {
             intent.setAction(getString(R.string.broadcast_update_ui));
             intent.putExtra(getString(R.string.broadcast_new_media_id), mediaId);
             sendBroadcast(intent);
+        }
+
+        class ServiceManager {
+            private PlaybackStateCompat mState;
+
+            public ServiceManager() {
+            }
+
+            public void displayNotification(PlaybackStateCompat state) {
+                Notification notification = null;
+                switch (state.getState()) {
+                    case PlaybackStateCompat.STATE_PLAYING: {
+                        notification = mMediaNotificationManager.buildNotification(
+                                state,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),null
+                        );
+                        if (!mIsServiceStarted) {
+                            ContextCompat.startForegroundService(
+                                    MediaService.this,
+                                    new Intent(MediaService.this,MediaService.class)
+                            );
+                            mIsServiceStarted = true;
+                        }
+                        startForeground(MediaNotificationManager.NOTIFICATION_ID,notification);
+                    }
+
+                    case PlaybackStateCompat.STATE_PAUSED: {
+                        stopForeground(false);
+                        notification = mMediaNotificationManager.buildNotification(
+                                state,getSessionToken(),mPlayback.getCurrentMedia().getDescription(),null
+                        );
+                        mMediaNotificationManager.getNotificationManager()
+                                .notify(MediaNotificationManager.NOTIFICATION_ID,notification);
+                    }
+                }
+            }
+            private void moveServiceOutOfStartedState() {
+                stopForeground(true);
+                stopSelf();
+                mIsServiceStarted = false;
+            }
         }
     }
 }
