@@ -170,6 +170,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private void saveLastSongProperties() {
         mIMainActivity.getMyPrefManager().savePlaylistId(mSelectedArtist.getArtist_id());
         mIMainActivity.getMyPrefManager().saveLastPlayedArtist(mSelectedArtist.getArtist_id());
+        Log.d(TAG, "saveLastSongProperties: save lastplayed category : "+mSelectedCategory);
         mIMainActivity.getMyPrefManager().saveLastPlayedCategory(mSelectedCategory);
         mIMainActivity.getMyPrefManager().saveLastPlayedArtistImage(mSelectedArtist.getImage());
         mIMainActivity.getMyPrefManager().saveLastPlayedMedia(mSelectedMedia.getDescription().getMediaId());

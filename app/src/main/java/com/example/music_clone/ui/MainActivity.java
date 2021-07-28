@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements
     private SeekBarBroadcastReceiver mSeekBarBroadcastReceiver;
     private UpdateUIBroadcastReceiver mUpdateUIBroadcastReceiver;
     private boolean mOnAppOpen;
+    private boolean mWasConfigurationChanged;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -107,6 +109,12 @@ public class MainActivity extends AppCompatActivity implements
         if (mUpdateUIBroadcastReceiver != null) {
             unregisterReceiver(mUpdateUIBroadcastReceiver);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mWasConfigurationChanged = true;
     }
 
     private class UpdateUIBroadcastReceiver extends BroadcastReceiver{
@@ -192,18 +200,22 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: last playlist id: "+getMyPrefManager().getPlaylistId());
+        Log.d(TAG, "onStart: last category : "+getMyPrefManager().getLastCategory());
         if (!getMyPrefManager().getPlaylistId().equals("")) {
             prepareLastPlayedMedia();
         }
         else{
-            mMediaBrowserHelper.onStart();
+            mMediaBrowserHelper.onStart(mWasConfigurationChanged);
         }
+//        mMediaBrowserHelper.onStart();
     }
 
     private void prepareLastPlayedMedia() {
         showProgressBar();
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         final List<MediaMetadataCompat> mediaItems = new ArrayList<>();
+        Log.d(TAG, "prepareLastPlayedMedia: called get category name= "+getMyPrefManager().getLastCategory());
         Query query = firestore
                 .collection(getString(R.string.collection_audio))
                 .document(getString(R.string.document_categories))
@@ -233,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void onFinishedGettingPreviousSessionData(List<MediaMetadataCompat> mediaItems) {
         getMyApplication().setMediaItems(mediaItems);
-        mMediaBrowserHelper.onStart();
+        mMediaBrowserHelper.onStart(mWasConfigurationChanged);
         hideProgressBar();
     }
 

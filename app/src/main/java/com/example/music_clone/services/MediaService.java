@@ -230,6 +230,11 @@ public class MediaService extends MediaBrowserServiceCompat {
     }
 
     private class MediaPlayerListener implements PlaybackInfoListener {
+        private ServiceManager mServiceManager;
+
+        public MediaPlayerListener() {
+            this.mServiceManager =new ServiceManager();
+        }
 
         // Report the state to the MediaSession.
         @Override
@@ -237,6 +242,16 @@ public class MediaService extends MediaBrowserServiceCompat {
             Log.d(TAG, "onPlaybackStateChange: called when clicked");
             // Reports the state change to the MediaSession
             mSession.setPlaybackState(state);
+            switch (state.getState()) {
+                case PlaybackStateCompat.STATE_PLAYING:
+                case PlaybackStateCompat.STATE_PAUSED:
+                    Log.d(TAG, "onPlaybackStateChange: state called 3: playing, 2: paused => "+state.getState());
+                    mServiceManager.displayNotification(state);
+                    break;
+                case PlaybackStateCompat.STATE_STOPPED:
+                    mServiceManager.moveServiceOutOfStartedState();
+                    break;
+            }
 
         }
 
@@ -283,6 +298,7 @@ public class MediaService extends MediaBrowserServiceCompat {
                             mIsServiceStarted = true;
                         }
                         startForeground(MediaNotificationManager.NOTIFICATION_ID,notification);
+                        break;
                     }
 
                     case PlaybackStateCompat.STATE_PAUSED: {
@@ -292,6 +308,7 @@ public class MediaService extends MediaBrowserServiceCompat {
                         );
                         mMediaNotificationManager.getNotificationManager()
                                 .notify(MediaNotificationManager.NOTIFICATION_ID,notification);
+                        break;
                     }
                 }
             }

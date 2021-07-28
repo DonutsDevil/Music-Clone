@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.session.PlaybackState;
 import android.os.Build;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -66,6 +67,7 @@ public class MediaNotificationManager {
                         PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                 )
         );
+        // cancel all previously shown notifications
         mNotificationManager.cancelAll();
     }
 
@@ -73,15 +75,22 @@ public class MediaNotificationManager {
         return mNotificationManager;
     }
 
+    // Does nothing on versions of Android earlier than O.
     @RequiresApi(Build.VERSION_CODES.O)
     private void createChannel() {
         if (mNotificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+            // The user-visible name of the channel.
             CharSequence name = "MediaSession";
+            // The user-visible description of the channel.
             String description = "MediaSession for media player";
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID,name,importance);
+            // Configure the notification channel.
             mChannel.setDescription(description);
             mChannel.enableLights(true);
+            // Sets the notification light color for notifications posted to this
+            // channel, if the device supports this feature.
+            mChannel.setLightColor(Color.RED);
             mChannel.enableVibration(true);
             mChannel.setVibrationPattern(new long[]{100,200,300,400,500,400,300,200,100});
             mNotificationManager.createNotificationChannel(mChannel);
@@ -102,6 +111,8 @@ public class MediaNotificationManager {
                                            Bitmap bitmap)
     {
         boolean isPlaying = state.getState() == PlaybackStateCompat.STATE_PLAYING;
+        Log.d(TAG, "buildNotification: playing? "+isPlaying);
+        // Create the (mandatory) notification channel when running on Android Oreo.
         if (isAndroidOOrHigher()) {
             createChannel();
         }
@@ -113,21 +124,31 @@ public class MediaNotificationManager {
                 .setShowActionsInCompactView(0,1,2)
                ).setColor(ContextCompat.getColor(mMediaService, R.color.notification_bg))
                 .setSmallIcon(R.drawable.ic_audiotrack_white_24dp)
+                // Pending intent that is fired when user clicks on notification.
                 .setContentIntent(createContentIntent())
+                // Title - Usually Song name.
                 .setContentTitle(description.getTitle())
+                // Subtitle - Usually Artist name.
                 .setContentText(description.getSubtitle())
                 .setLargeIcon(bitmap)
+                // When notification is deleted (when playback is paused and notification can be
+                // deleted) fire MediaButtonPendingIntent with ACTION_STOP.
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
                         mMediaService, PlaybackStateCompat.ACTION_STOP)
                 )
+                // Show controls on lock screen even when user hides sensitive content.
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
+        // If skip to previous action is enabled.
         if ((state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0) {
             builder.addAction(mPrevAction);
+            Log.d(TAG, "buildNotification: prev");
         }
         builder.addAction(isPlaying ? mPauseAction : mPlayAction);
+        // If skip to next action is enabled.
         if ((state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0) {
             builder.addAction(mNextAction);
+            Log.d(TAG, "buildNotification: skip");
         }
 
         return builder.build();
