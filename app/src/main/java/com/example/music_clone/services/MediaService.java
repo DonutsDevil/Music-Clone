@@ -194,6 +194,7 @@ public class MediaService extends MediaBrowserServiceCompat {
 
         @Override
         public void onPause() {
+            stopForeground(false);
             Log.d(TAG, "onPause: is called");
             mPlayback.pause();
         }
@@ -218,6 +219,8 @@ public class MediaService extends MediaBrowserServiceCompat {
         public void onStop() {
             mPlayback.stop();
             mSession.setActive(false);
+            stopForeground(true);
+            mMediaNotificationManager.unregisterNotificationBroadcast();
         }
 
         @Override

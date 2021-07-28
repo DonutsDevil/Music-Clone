@@ -217,4 +217,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
         }
     }
 
+    public void unregisterNotificationBroadcast() {
+        mMediaService.unregisterReceiver(this);
+    }
 }
