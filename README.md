@@ -3,7 +3,7 @@ I use the ExoPlayer library for streaming the audio files and Firebase Firestore
 ## About
 This app uses Foreground services for MediaSession, Broadcast Receivers for communicating Callbacks and updates, MediaServices (a class specifically built to stream media files)), Notification Manager, Glide library to download bitmaps, Asynctask, Custom SeekBar for audio timeline, and <a href = '#Used'>Much More </a>
 ### Installing
-Clone this repo and build.
+Open android studio -> import from vcs -> run.
 
 ## Preview
 &emsp; &emsp; &emsp; <img src="Assest/Gifs/play.gif" width="150">  &emsp; &emsp; &emsp; &emsp; &emsp; <img src="Assest/Gifs/change_song.gif" width="150">  &emsp; &emsp; &emsp; <img src="Assest/Gifs//lock_c.gif" width="150"> <br />
